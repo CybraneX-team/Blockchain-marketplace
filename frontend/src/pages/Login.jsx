@@ -3,7 +3,7 @@ import { useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import Login from "../components/Login/Login.jsx";
 
-const LoginPage = () => {
+const LoginPage = (connectWallet) => {
   const navigate = useNavigate();
   const { isAuthenticated } = useSelector((state) => state.user);
 
@@ -15,7 +15,7 @@ const LoginPage = () => {
   
   return (
     <div>
-        <Login />
+        <Login connector={connectWallet}/>
     </div>
   )
 }

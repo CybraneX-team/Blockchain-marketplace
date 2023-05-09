@@ -1,16 +1,20 @@
-import { React, useState } from "react";
+import { React, useEffect, useState } from "react";
 import { AiOutlineEye, AiOutlineEyeInvisible } from "react-icons/ai";
+import { FaWallet } from "react-icons/fa"
 import styles from "../../styles/styles";
 import { Link, useNavigate } from "react-router-dom";
+
 import axios from "axios";
 import { server } from "../../server";
 import { toast } from "react-toastify";
+import { useSelector } from "react-redux";
 
-const Login = () => {
+const Login = (connecter) => {
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [visible, setVisible] = useState(false);
+  const walletAddress = useSelector((state)=>state.wallet.walletAddress);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -34,15 +38,21 @@ const Login = () => {
       });
   };
 
+  useEffect(()=>{
+   if(walletAddress){
+    navigate("/");
+   }
+  },[walletAddress]);
+
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
       <div className="sm:mx-auto sm:w-full sm:max-w-md">
         <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Login to your account
+          Login With Metamask
         </h2>
       </div>
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
-        <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
+     {/*   <div className="bg-white py-8 px-4 shadow sm:rounded-lg sm:px-10">
           <form className="space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
@@ -134,8 +144,15 @@ const Login = () => {
               </Link>
             </div>
           </form>
+        </div>*/}
+        <div className="grid grid-cols-1 justify-items-center cursor-pointer">
+        <FaWallet size={50} onClick={()=>{
+         connecter.connector.connectWallet();
+         
+          }}/>
         </div>
       </div>
+
     </div>
   );
 };

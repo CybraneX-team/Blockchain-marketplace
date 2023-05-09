@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import "./App.css";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import {
   LoginPage,
   SignupPage,
@@ -37,20 +37,51 @@ import { ShopHomePage } from "./ShopRoutes.js";
 import SellerProtectedRoute from "./routes/SellerProtectedRoute";
 import { getAllProducts } from "./redux/actions/product";
 import { getAllEvents } from "./redux/actions/event";
+import { useAccount, useConnect, useContractEvent } from 'wagmi'
+import { InjectedConnector } from 'wagmi/connectors/injected'
+import { abi } from "./components/abi/vendor";
+
 
 const App = () => {
+  const { address, isConnected } = useAccount();
+  const { connect } = useConnect({
+    connector: new InjectedConnector(),
+  });
+
+  useContractEvent({
+    address: "0x5fDf5B9cc9369e0Ec9daA749eabe4fA151D7e8B2",
+    abi: abi,
+    eventName: "listedProduct",
+    listener(_vendor, _title, _key){
+      console.log(_vendor,_title, parseInt(_key));
+    }
+  });
+
+  
+
   useEffect(() => {
     Store.dispatch(loadUser());
     Store.dispatch(loadSeller());
     Store.dispatch(getAllProducts());
     Store.dispatch(getAllEvents());
-  }, []);
+    if(isConnected){
+      Store.dispatch({
+        type: "setWalletAddress",
+        payload: address
+      });
+    }else if(!isConnected){
+      Store.dispatch({
+        type:"setWalletAddress",
+        payload: undefined
+      })
+    }
+  }, [isConnected,address]);
 
   return (
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/login" element={<LoginPage />} />
+        <Route path="/login" element={<LoginPage connectWallet={connect}/>} />
         <Route path="/sign-up" element={<SignupPage />} />
         <Route
           path="/activation/:activation_token"
